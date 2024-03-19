@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  vm1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./vm1-scripts:/vm1-scripts
+      - /Volumes/raymondsmb/logs:/logs
+    command: >
+      sh -c "
+      cd /vm1-scripts/log-writer && go run . &
+      
+      cd /vm1-scripts/flog && go run . -l -q -r 50 > /logs/flog-l-q-r-50.log &
+
+      chmod +x /vm1-scripts/dd-command/command.sh &&
+      /vm1-scripts/dd-command/command.sh
+      "
+
+  vm2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./vm2-scripts:/vm2-scripts`
+      - /Volumes/raymondsmb/logs/:/logs
+    command: >
+      sh -c "
+      cd /vm2-scripts/rotation-detector && go run . -d '/logs'
+      "
